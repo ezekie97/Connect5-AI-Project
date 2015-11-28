@@ -1,6 +1,7 @@
 import pygame
 from src.board import *
-import os
+from src.minimax import *
+import random
 
 __author__ = 'Bill Ezekiel'
 
@@ -14,15 +15,13 @@ class Game:
     The message box displays messages about the game, notifying the player when to go, when the
     game has ended, who has won, and several other messages.
     """
-
+    # Class Constants
     pygame.mixer.pre_init(44100, 16, 2, 4096)
     pygame.init()
 
-    # Class Constants
-
     # Player Constants
-    PLAYER_ONE = "R"
-    PLAYER_TWO = "B"
+    PLAYER_MOVE_FIRST = "R"  # Red always moves first.
+    PLAYER_MOVE_LAST = "B"
 
     # Image Files
     RED_CHIP = pygame.image.load("../img/red_chip.png")
@@ -70,9 +69,14 @@ class Game:
         Generate a game object and start the game.
         """
         self.board = Board()
-        self.window = self.init_window()
         self.game_over = False
-        self.control = self.PLAYER_ONE  # Player One Moves First
+        self.player_one = None  # Human is player one.
+        self.player_two = None  # AI is player two.
+        self.control = 0
+        # Randomly Choose order of play
+        self.decide_first_player()
+        self.minimax = MiniMax(self.player_one, self.player_two)
+        self.window = self.init_window()
         pygame.display.flip()
         self.begin()
 
@@ -93,7 +97,10 @@ class Game:
         self.draw_board(screen)
 
         # Initialize Message Box Area with preliminary text.
-        self.refresh_msg_box(screen, self.MSG_YOUR_TURN)
+        if self.control == self.player_one:  # player_one is human
+            self.refresh_msg_box(screen, self.MSG_YOUR_TURN)
+        else:  # player_two is not.
+            self.refresh_msg_box(screen, self.MSG_AI_TURN)
         return screen
 
     def clear_mouse_area(self, screen):
@@ -104,14 +111,30 @@ class Game:
         position = 0, 0
         screen.blit(self.MOUSE_AREA_BACKGROUND, position)
 
+    def decide_first_player(self):
+        """
+        Randomly Choose which player goes first and set control of the board to
+        that player.
+        """
+        player = random.randint(1, 2)
+        # player = 2
+        print(player)
+        if player == 2:
+            self.player_one = self.PLAYER_MOVE_LAST
+            self.player_two = self.PLAYER_MOVE_FIRST
+        else:
+            self.player_one = self.PLAYER_MOVE_FIRST
+            self.player_two = self.PLAYER_MOVE_LAST
+        self.control = self.PLAYER_MOVE_FIRST
+
     def switch_players(self):
         """
         Switch which player's turn it is.
         """
-        if self.control == self.PLAYER_ONE:
-            self.control = self.PLAYER_TWO
+        if self.control == self.PLAYER_MOVE_FIRST:
+            self.control = self.PLAYER_MOVE_LAST
         else:
-            self.control = self.PLAYER_ONE
+            self.control = self.PLAYER_MOVE_FIRST
 
     def draw_board(self, screen):
         """
@@ -125,9 +148,9 @@ class Game:
             for j in range(0, self.board.get_length()):
                 screen_position = j * self.IMG_LENGTH, (i * self.IMG_LENGTH) + self.MOUSE_AREA_HEIGHT
                 player = self.board.piece_at(i, j)
-                if player == self.PLAYER_ONE:
+                if player == self.PLAYER_MOVE_FIRST:
                     screen.blit(self.RED_SPACE, screen_position)
-                elif player == self.PLAYER_TWO:
+                elif player == self.PLAYER_MOVE_LAST:
                     screen.blit(self.BLACK_SPACE, screen_position)
                 else:
                     screen.blit(self.BLANK_SPACE, screen_position)
@@ -145,9 +168,6 @@ class Game:
         msg_text = font.render(text, 1, (0, 0, 0))
         position = 20, (self.MOUSE_AREA_HEIGHT + self.BOARD_HEIGHT + self.PADDING)
         screen.blit(msg_text, position)
-        font = pygame.font.Font(None, 24)
-        restart = font.render("Restart?", 1, (0, 0, 0))
-        screen.blit(restart, (375, 520))
 
     def mouse_move_event(self, event, screen):
         """
@@ -158,16 +178,17 @@ class Game:
         position = 0, 0
         screen.blit(self.MOUSE_AREA_BACKGROUND, position)
         mouse_position = event.pos
-        if self.in_mouse_area(mouse_position):
-            x = mouse_position[0]
-            col = x // self.IMG_LENGTH
-            position = (50*col, 30)
-            if self.control == self.PLAYER_ONE:
-                # Red's Move
-                screen.blit(self.RED_CHIP, position)
-            else:
-                # Black's Move
-                screen.blit(self.BLACK_CHIP, position)
+        if self.control == self.player_one:  # show the player
+            if self.in_mouse_area(mouse_position):
+                x = mouse_position[0]
+                col = x // self.IMG_LENGTH
+                position = (50 * col, 30)
+                if self.control == self.PLAYER_MOVE_FIRST:
+                    # Red's Move
+                    screen.blit(self.RED_CHIP, position)
+                else:
+                    # Black's Move
+                    screen.blit(self.BLACK_CHIP, position)
 
     def mouse_click_event(self, event, screen):
         """
@@ -179,33 +200,28 @@ class Game:
         if self.in_mouse_area(mouse_position):
             x = mouse_position[0]
             col = x // self.IMG_LENGTH
-            if self.board.drop(self.control, col):
+            if self.board.can_drop(col)[0]:
+                self.board.drop(self.control, col)
                 self.draw_board(screen)
                 self.DROP_SOUND.play()
-                if self.board.is_winner():  # Winner
-                    if self.control == self.PLAYER_ONE:    # Red (Human?)
-                        self.refresh_msg_box(screen, self.MSG_GAME_OVER + " " + self.MSG_YOU_WIN)
-                        self.WIN_SOUND.play()
-                    else:   # Black (AI?)
-                        self.refresh_msg_box(screen, self.MSG_GAME_OVER + " " + self.MSG_AI_WIN)
-                        self.LOSE_SOUND.play()
+                winner = self.board.find_winner()
+                if winner == self.player_one:  # Winner Human Player
+                    self.refresh_msg_box(screen, self.MSG_GAME_OVER + " " + self.MSG_YOU_WIN)
+                    self.WIN_SOUND.play()
                     self.game_over = True
                     self.clear_mouse_area(screen)
-
-                elif self.board.is_filled():   # Tie, board is filled with no winner.
+                elif self.board.is_filled():  # Tie, board is filled with no winner.
                     self.refresh_msg_box(screen, self.MSG_TIE + " " + self.MSG_GAME_OVER)
                     self.LOSE_SOUND.play()
                     self.game_over = True
                     self.clear_mouse_area(screen)
-
-                else:   # Game continues
+                else:  # Game continues
                     self.switch_players()
                     # Refresh Mouse Area with Correct Players Piece.
                     self.mouse_move_event(event, screen)
-                    if self.control == self.PLAYER_ONE:
-                        self.refresh_msg_box(screen, self.MSG_YOUR_TURN)
-                    else:
-                        self.refresh_msg_box(screen, self.MSG_AI_TURN)
+                    self.refresh_msg_box(screen, self.MSG_AI_TURN)
+                    pygame.display.flip()
+                    self.ai_take_turn(event, self.window)
             else:
                 self.refresh_msg_box(screen, self.MSG_INVALID_DROP)
 
@@ -220,6 +236,27 @@ class Game:
         # the x value doesn't matter.
         return 0 < y <= self.MOUSE_AREA_HEIGHT
 
+    def ai_take_turn(self, event, screen):
+        best_board = self.minimax.mini_max(self.board, 1, True)[0]
+        col = best_board.get_last_move()[1]
+        self.board.drop(self.player_two, col)
+        winner = self.board.find_winner()
+        self.draw_board(screen)
+        self.DROP_SOUND.play()
+        if winner == self.player_two:  # AI player
+            self.refresh_msg_box(screen, self.MSG_GAME_OVER + " " + self.MSG_AI_WIN)
+            self.LOSE_SOUND.play()
+            self.game_over = True
+            self.clear_mouse_area(screen)
+        elif self.board.is_filled():  # Tie, board is filled with no winner.
+            self.refresh_msg_box(screen, self.MSG_TIE + " " + self.MSG_GAME_OVER)
+            self.LOSE_SOUND.play()
+            self.game_over = True
+            self.clear_mouse_area(screen)
+        else:
+            self.switch_players()
+            self.refresh_msg_box(screen, self.MSG_YOUR_TURN)
+
     def begin(self):
         """
         Begin the game, as of right now it is not playable however holding and releasing keys
@@ -231,11 +268,16 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.game_over = True
                     window_open = False
-                if not self.game_over:
-                    if event.type == pygame.MOUSEMOTION:
-                        self.mouse_move_event(event, self.window)
-                    if event.type == pygame.MOUSEBUTTONUP:
-                        self.mouse_click_event(event, self.window)
-                pygame.display.flip()
+                if self.control == self.player_one:  # Human's turn
+                    if not self.game_over:
+                        if event.type == pygame.MOUSEMOTION:
+                            self.mouse_move_event(event, self.window)
+                        if event.type == pygame.MOUSEBUTTONUP:
+                            self.mouse_click_event(event, self.window)
+                else:
+                    if not self.game_over:  # if AI goes first.
+                        self.ai_take_turn(event, self.window)
+            pygame.display.flip()
+
 
 g = Game()
