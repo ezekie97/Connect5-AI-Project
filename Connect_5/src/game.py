@@ -237,8 +237,11 @@ class Game:
         return 0 < y <= self.MOUSE_AREA_HEIGHT
 
     def ai_take_turn(self, event, screen):
-        best_board = self.minimax.mini_max(self.board, 1, True)[0]
+        best_board = self.minimax.mini_max(self.board, 2, True).get_board()
         col = best_board.get_last_move()[1]
+        #col = random.randint(0,6)
+        #while not self.board.can_drop(col):
+        #    col = random.randint(0,6)
         self.board.drop(self.player_two, col)
         winner = self.board.find_winner()
         self.draw_board(screen)
@@ -256,6 +259,7 @@ class Game:
         else:
             self.switch_players()
             self.refresh_msg_box(screen, self.MSG_YOUR_TURN)
+        self.minimax.heuristic_finder.heuristic(self.board)
 
     def begin(self):
         """

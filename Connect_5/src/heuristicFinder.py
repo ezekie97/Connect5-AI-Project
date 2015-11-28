@@ -19,16 +19,16 @@ class HeuristicFinder:
         :param board: A Connect 5 Board object.
         :return: a number representing the heuristic value.
             Special Values:
-                -150 - Board where AI wins.
-                -150 - Board where AI loses.
-                - 0  - Tie
+                1000 - Board where AI wins.
+                -1000 - Board where AI loses.
+                0  - Tie
         """
         if board.is_filled():
             return 0
         elif board.find_winner() == self.ai_player:  # AI Wins
-            return 1000
-        elif board.find_winner() is not None:
-            return -1000
+            return 10000
+        elif board.find_winner() == self.human_player:  # AI Loses
+            return -10000
         else:
             ai_four_in_row = board.find_n_in_a_row(self.ai_player, 4)
             ai_three_in_row = board.find_n_in_a_row(self.ai_player, 3)
@@ -38,20 +38,28 @@ class HeuristicFinder:
             human_three_in_row = board.find_n_in_a_row(self.human_player, 3)
             human_two_in_row = board.find_n_in_a_row(self.human_player, 2)
 
-            #print("Human")
-
-            #print([self.human_player, human_four_in_row, human_three_in_row, human_two_in_row])
-            #print("AI")
-            #print([self.ai_player, ai_four_in_row, ai_three_in_row, ai_two_in_row])
-
-            heuristic =  7 * ai_four_in_row + 3 * ai_three_in_row + ai_two_in_row
-            heuristic -= 7 * human_four_in_row + 3 * human_three_in_row + human_two_in_row
+            heuristic = 100 * ai_four_in_row + 10 * ai_three_in_row + 0.5 * ai_two_in_row
+            heuristic -= 100 * human_four_in_row + 10 * human_three_in_row + 0.5 * human_two_in_row
 
             bonus = 0
-            if self.ai_player == board.piece_at(6, 4):  # center
-                bonus += 5
-            elif self.ai_player == board.piece_at(6, 0) or self.ai_player == board.piece_at(6, 8):
-                bonus += 2
+            center = board.piece_at(6,4)
+            left_corner = board.piece_at(6,0)
+            right_corner = board.piece_at(6,8)
+            if self.ai_player == center:  # center
+                bonus += 50
+            elif self.human_player == center:
+                bonus -= 50
+
+            if self.ai_player == left_corner:  # center
+                bonus += 15
+            elif self.human_player == left_corner:
+                bonus -= 15
+
+            if self.ai_player == right_corner:  # center
+                bonus += 15
+            elif self.human_player == right_corner:
+                bonus -= 15
+
             heuristic += bonus
 
             #print("Heuristic")

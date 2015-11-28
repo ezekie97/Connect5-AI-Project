@@ -158,7 +158,7 @@ class Board:
             if curr_col > Board.get_length() - 1 or curr_row < 0:  # check out of bounds
                 break
             if self.grid[curr_col][curr_row] != piece:
-                return 0
+                break
             else:
                 streak += 1
         if streak == n:
@@ -172,13 +172,116 @@ class Board:
             if curr_col < 0 or curr_row < 0:  # check out of bounds
                 break
             if self.grid[curr_col][curr_row] != piece:
-                return 0
+                break
             else:
                 streak += 1
         if streak == n:
             result += 1
 
         return result
+
+    # def n_in_a_row_blocked(self, piece, opp_piece, n):
+    #     """
+    #     :param piece: the player
+    #     :param n: the number of player pieces in a row before its blocked by the opponent
+    #     :param opp_piece: the opponents piece
+    #     :return: the number of times on the board n_in_a_row streaks are blocked by the opponent.
+    #     """
+    #     count = 0
+    #     for row in range(0, Board.get_height()):
+    #         for col in range(0, Board.get_length()):
+    #             current_piece = self.grid[col][row]
+    #             if current_piece == piece:
+    #                 count += self.n_in_a_row_blocked_horizontal(row, col, current_piece, opp_piece, n)  # 0 or 1
+    #                 count += self.num_n_in_a_row_blocked_vertical(row, col, current_piece, opp_piece, n)  # 0 or 1
+    #                 count += self.num_n_in_a_row_blocked_diagonal(row, col, current_piece, opp_piece, n)  # 0, 1,  or 2
+    #             return count
+    #
+    # def num_n_in_a_row_blocked_horizontal(self, row, col, piece, opp_piece, n):
+    #     """
+    #     Look for a case of n_in_a_row for a given piece, and then check if the very next piece blocks it.
+    #     :param row: the row number of the piece
+    #     :param col: the column number of the piece
+    #     :param piece: the type of the piece
+    #     :param opp_piece: the type of the opponents piece
+    #     :param n: Look for n_in_a_row that is then blocked by the opponent horizontally.
+    #     :return: The number of times an n_in_a_row streak is blocked by the opponent horizontally.
+    #     """
+    #     streak = 0
+    #     for curr_col in range(col, col + n + 1):  # count the initial piece automatically
+    #         if curr_col > Board.get_length() - 1:  # check out of bounds
+    #             break
+    #         if self.grid[curr_col][row] == opp_piece:
+    #             if streak == n:
+    #                 return 1
+    #             return 0
+    #         else:
+    #             streak += 1
+    #     return 0  # no block if loop broken.
+    #
+    # def num_n_in_a_row_blocked_vertical(self, row, col, piece,opp_piece, n):
+    #     """
+    #     Look for a case of n_in_a_row for a given piece, and then check if the very next piece blocks it.
+    #     :param row: the row number of the piece
+    #     :param col: the column number of the piece
+    #     :param piece: the type of the piece
+    #     :param opp_piece: the type of the opponents piece
+    #     :param n: Look for n_in_a_row that is then blocked by the opponent vertically.
+    #     :return: The number of times an n_in_a_row streak is blocked by the opponent vertically.
+    #     """
+    #     streak = 0
+    #     for curr_row in range(row - n + 1, row + 2):  # count the initial piece automatically
+    #         if curr_row < 0 or curr_row > Board.get_height():  # check out of bounds
+    #             break
+    #         if self.grid[col][curr_row] == opp_piece:
+    #             if streak == n:
+    #                 return 1
+    #             return 0
+    #         else:
+    #             streak += 1
+    #     return 0
+    #
+    # def num_n_in_a_row_blocked_diagonal(self, row, col, piece,opp_piece, n):
+    #     """
+    #     Look for a case of n_in_a_row for a given piece, and then check if the very next piece blocks it.
+    #     :param row: the row number of the piece
+    #     :param col: the column number of the piece
+    #     :param piece: the type of the piece
+    #     :param opp_piece: the type of the opponents piece
+    #     :param n: Look for n_in_a_row that is then blocked by the opponent diagonally.
+    #     :return: The number of times an n_in_a_row streak is blocked by the opponent diagonally.
+    #     """
+    #     result = 0
+    #     streak = 0
+    #     for modifier in range(0, n+1):  # count the initial piece automatically
+    #         curr_col = col + modifier
+    #         curr_row = row - modifier
+    #          # check out of bounds
+    #         if curr_col > Board.get_length() - 1 or curr_row < 0 or curr_row > Board.get_height():
+    #             break
+    #         if self.grid[curr_col][curr_row] == opp_piece:
+    #             if streak == n:
+    #                 result += 1
+    #             break
+    #         else:
+    #             streak += 1
+    #
+    #     streak = 0  # reset streak
+    #
+    #     for modifier in range(0, n):  # count the initial piece automatically
+    #         curr_col = col - modifier
+    #         curr_row = row - modifier
+    #         if curr_col < 0 or curr_row < 0:  # check out of bounds
+    #             break
+    #         if self.grid[curr_col][curr_row] == opp_piece:
+    #             if streak == n:
+    #                 result+= 1
+    #             break
+    #         else:
+    #             streak += 1
+    #         break
+    #
+    #     return result
 
     def find_winner(self):
         """
@@ -239,101 +342,101 @@ class Board:
         """
         return Board.BOARD_HEIGHT
 
-        # def get_threats(self):
-        #     """
-        #     :return: the dictionary containing all threats on the board.
-        #     """
-        #     return self.threats
-        #
-        # def get_player_one_even_threats(self):
-        #     """
-        #     :return: the number of even threats for player one
-        #     """
-        #     return self.threats["1E"]
-        #
-        # def get_player_one_odd_threats(self):
-        #     """
-        #     :return: the number of odd threats for player one
-        #     """
-        #     return self.threats["1O"]
-        #
-        # def get_player_two_even_threats(self):
-        #     """
-        #     :return: the number of even threats for player two
-        #     """
-        #     return self.threats["2E"]
-        #
-        # def get_player_two_odd_threats(self):
-        #     """
-        #     :return: the number of odd threats for player two
-        #     """
-        #     return self.threats["2O"]
+                # def get_threats(self):
+                #     """
+                #     :return: the dictionary containing all threats on the board.
+                #     """
+                #     return self.threats
+                #
+                # def get_player_one_even_threats(self):
+                #     """
+                #     :return: the number of even threats for player one
+                #     """
+                #     return self.threats["1E"]
+                #
+                # def get_player_one_odd_threats(self):
+                #     """
+                #     :return: the number of odd threats for player one
+                #     """
+                #     return self.threats["1O"]
+                #
+                # def get_player_two_even_threats(self):
+                #     """
+                #     :return: the number of even threats for player two
+                #     """
+                #     return self.threats["2E"]
+                #
+                # def get_player_two_odd_threats(self):
+                #     """
+                #     :return: the number of odd threats for player two
+                #     """
+                #     return self.threats["2O"]
 
-        # def assess_threats(self):
-        #     p1_even_threats = 0
-        #     p1_odd_threats = 0
-        #     p2_even_threats = 0
-        #     p2_odd_threats = 0
-        #     for row in range(0, Board.get_height()):
-        #         for col in range(0, Board.get_length()):
-        #             space_threats = self.get_threats_at(row, col)
-        #             p1_even_threats += space_threats["1E"]
-        #             p2_even_threats += space_threats["2E"]
-        #             p1_odd_threats += space_threats["1O"]
-        #             p2_odd_threats += space_threats["2O"]
-        #     self.threats["1E"] = p1_even_threats
-        #     self.threats["1O"] = p1_odd_threats
-        #     self.threats["2E"] = p2_even_threats
-        #     self.threats["2O"] = p2_odd_threats
-        #     print(self.threats)
+                # def assess_threats(self):
+                #     p1_even_threats = 0
+                #     p1_odd_threats = 0
+                #     p2_even_threats = 0
+                #     p2_odd_threats = 0
+                #     for row in range(0, Board.get_height()):
+                #         for col in range(0, Board.get_length()):
+                #             space_threats = self.get_threats_at(row, col)
+                #             p1_even_threats += space_threats["1E"]
+                #             p2_even_threats += space_threats["2E"]
+                #             p1_odd_threats += space_threats["1O"]
+                #             p2_odd_threats += space_threats["2O"]
+                #     self.threats["1E"] = p1_even_threats
+                #     self.threats["1O"] = p1_odd_threats
+                #     self.threats["2E"] = p2_even_threats
+                #     self.threats["2O"] = p2_odd_threats
+                #     print(self.threats)
 
-        # def get_threats_at(self, row, col):
-        #     space = self.grid[col][row]
-        #     space_threats = {"1E": 0, "1O": 0, "2E": 0, "2O": 0}
-        #     if space == Board.BLANK_SPACE:
-        #         best_streaks = {Board.PLAYER_ONE: 0, Board.PLAYER_TWO: 0}
-        #         current_streak = 0
-        #         last_piece = None
-        #         for current_col in range(col - 4, col + 5):
-        #             # Out of bounds or at space's column, in which case a streak should continue.
-        #             if current_col < 0 or current_col == col:
-        #                 continue
-        #             if current_col > (Board.get_length() - 1):
-        #                 if last_piece is not None and last_piece != Board.BLANK_SPACE:
-        #                     if current_streak > best_streaks[last_piece]:
-        #                         best_streaks[last_piece] = current_streak
-        #                 break
-        #             current_piece = self.grid[current_col][row]
-        #             if current_piece != Board.BLANK_SPACE:
-        #                 if last_piece is None:
-        #                     current_streak += 1
-        #                     last_piece = current_piece
-        #                 elif last_piece == current_piece:
-        #                     current_streak += 1
-        #                 else:
-        #                     if last_piece != Board.BLANK_SPACE:
-        #                         if current_streak > best_streaks[last_piece]:
-        #                             best_streaks[last_piece] = current_streak
-        #                             current_streak = 1
-        #                     else:
-        #                         current_streak = 0
-        #                     last_piece = current_piece
-        #             else:
-        #                 if last_piece is not None and last_piece != Board.BLANK_SPACE:
-        #                     if current_streak > best_streaks[last_piece]:
-        #                         best_streaks[last_piece] = current_streak
-        #                 current_streak = 0
-        #                 last_piece = current_piece
-        #         even = row % 2 == 0
-        #         if even:
-        #             if best_streaks[Board.PLAYER_ONE] >= 4:
-        #                 space_threats["1E"] = 1
-        #             if best_streaks[Board.PLAYER_TWO] >= 4:
-        #                 space_threats["2E"] = 1
-        #         else:
-        #             if best_streaks[Board.PLAYER_ONE] >= 4:
-        #                 space_threats["1O"] = 1
-        #             if best_streaks[Board.PLAYER_TWO] >= 4:
-        #                 space_threats["2O"] = 1
-        #
-        #     return space_threats
+                # def get_threats_at(self, row, col):
+                #     space = self.grid[col][row]
+                #     space_threats = {"1E": 0, "1O": 0, "2E": 0, "2O": 0}
+                #     if space == Board.BLANK_SPACE:
+                #         best_streaks = {Board.PLAYER_ONE: 0, Board.PLAYER_TWO: 0}
+                #         current_streak = 0
+                #         last_piece = None
+                #         for current_col in range(col - 4, col + 5):
+                #             # Out of bounds or at space's column, in which case a streak should continue.
+                #             if current_col < 0 or current_col == col:
+                #                 continue
+                #             if current_col > (Board.get_length() - 1):
+                #                 if last_piece is not None and last_piece != Board.BLANK_SPACE:
+                #                     if current_streak > best_streaks[last_piece]:
+                #                         best_streaks[last_piece] = current_streak
+                #                 break
+                #             current_piece = self.grid[current_col][row]
+                #             if current_piece != Board.BLANK_SPACE:
+                #                 if last_piece is None:
+                #                     current_streak += 1
+                #                     last_piece = current_piece
+                #                 elif last_piece == current_piece:
+                #                     current_streak += 1
+                #                 else:
+                #                     if last_piece != Board.BLANK_SPACE:
+                #                         if current_streak > best_streaks[last_piece]:
+                #                             best_streaks[last_piece] = current_streak
+                #                             current_streak = 1
+                #                     else:
+                #                         current_streak = 0
+                #                     last_piece = current_piece
+                #             else:
+                #                 if last_piece is not None and last_piece != Board.BLANK_SPACE:
+                #                     if current_streak > best_streaks[last_piece]:
+                #                         best_streaks[last_piece] = current_streak
+                #                 current_streak = 0
+                #                 last_piece = current_piece
+                #         even = row % 2 == 0
+                #         if even:
+                #             if best_streaks[Board.PLAYER_ONE] >= 4:
+                #                 space_threats["1E"] = 1
+                #             if best_streaks[Board.PLAYER_TWO] >= 4:
+                #                 space_threats["2E"] = 1
+                #         else:
+                #             if best_streaks[Board.PLAYER_ONE] >= 4:
+                #                 space_threats["1O"] = 1
+                #             if best_streaks[Board.PLAYER_TWO] >= 4:
+                #                 space_threats["2O"] = 1
+                #
+                #     return space_threats

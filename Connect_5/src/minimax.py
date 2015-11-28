@@ -1,5 +1,6 @@
 from src.heuristicFinder import *
 from src.board import *
+from src.board_node import *
 import copy
 
 __author__ = 'Bill'
@@ -24,33 +25,39 @@ class MiniMax:
         :param max_node: boolean value to determine whether we are at max or min node.
         :return: The next node to move to in the min_max tree
         """
-        options = []
         if depth == 0:
-            return [board, self.heuristic_finder.heuristic(board)]
+            return BoardNode(board,self.heuristic_finder.heuristic(board))
         elif max_node:  # max
+            parent = BoardNode(board,0)
             for col in range(0, Board.get_length()):
                 board_copy = copy.deepcopy(board)
                 if board_copy.can_drop(col)[0]:
                     board_copy.drop(self.ai, col)
-                    options.append(self.mini_max(board_copy, depth - 1, False))
-            maximum = options[0][1]
-            max_board = options[0][0]
-            for j in range(1, len(options)):
-                if options[j][1] > maximum:
-                    maximum = options[j][1]
-                    max_board = options[j][0]
-            return [max_board, maximum]
-
+                    parent.add_child(BoardNode(board_copy, self.mini_max(board_copy,depth-1,False).get_heuristic()))
+            children = parent.get_children()
+            for i in range(0,len(children)):
+                print(children[i].get_board())
+            maximum = children[0].get_heuristic()
+            child_pos = 0
+            for i in range(1, len(children)):
+                if children[i].get_heuristic() > maximum:
+                    maximum = children[i].get_heuristic()
+                    child_pos = i
+            return BoardNode(children[child_pos].get_board(),maximum)
         else:  # min
+            parent = BoardNode(board,0)
             for col in range(0, Board.get_length()):
                 board_copy = copy.deepcopy(board)
                 if board_copy.can_drop(col)[0]:
                     board_copy.drop(self.human, col)
-                    options.append(self.mini_max(board_copy, depth - 1, True))
-            minimum = options[0][1]
-            min_board = options[0][0]
-            for j in range(1, len(options)):
-                if options[j][1] < minimum:
-                    minimum = options[j][1]
-                    min_board = options[j][0]
-            return [min_board, minimum]
+                    parent.add_child(BoardNode(board_copy, self.mini_max(board_copy,depth-1,True).get_heuristic()))
+            children = parent.get_children()
+            for i in range(0,len(children)):
+                print(children[i].get_board())
+            minimum = children[0].get_heuristic()
+            child_pos = 0
+            for i in range(1, len(children)):
+                if children[i].get_heuristic() < minimum:
+                    minimum = children[i].get_heuristic()
+                    child_pos = i
+            return BoardNode(children[child_pos].get_board(),minimum)
