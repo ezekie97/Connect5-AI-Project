@@ -1,7 +1,7 @@
 import pygame
-from src.board import *
-from src.minimax import *
 import random
+from src.minimax import *
+
 
 __author__ = 'Bill Ezekiel'
 
@@ -15,7 +15,8 @@ class Game:
     The message box displays messages about the game, notifying the player when to go, when the
     game has ended, who has won, and several other messages.
     """
-    # Class Constants
+
+    # Initialize pygame components
     pygame.mixer.pre_init(44100, 16, 2, 4096)
     pygame.init()
 
@@ -53,7 +54,7 @@ class Game:
     MSG_INVALID_DROP = "You can't drop a piece there!"
 
     # Size of window and its components (in pixels).
-    # Window Dimensions = 450 x 540
+    # Window Dimensions = 450px x 540px
     BOARD_LENGTH = Board.get_length() * IMG_LENGTH
     BOARD_HEIGHT = Board.get_height() * IMG_LENGTH
     MOUSE_AREA_LENGTH = Board.get_length()
@@ -117,8 +118,6 @@ class Game:
         that player.
         """
         player = random.randint(1, 2)
-        # player = 2
-        print(player)
         if player == 2:
             self.player_one = self.PLAYER_MOVE_LAST
             self.player_two = self.PLAYER_MOVE_FIRST
@@ -221,7 +220,7 @@ class Game:
                     self.mouse_move_event(event, screen)
                     self.refresh_msg_box(screen, self.MSG_AI_TURN)
                     pygame.display.flip()
-                    self.ai_take_turn(event, self.window)
+                    self.ai_take_turn(self.window)
             else:
                 self.refresh_msg_box(screen, self.MSG_INVALID_DROP)
 
@@ -236,12 +235,13 @@ class Game:
         # the x value doesn't matter.
         return 0 < y <= self.MOUSE_AREA_HEIGHT
 
-    def ai_take_turn(self, event, screen):
+    def ai_take_turn(self, screen):
+        """
+        AI makes its move.
+        :param screen: the game screen
+        """
         best_board = self.minimax.mini_max(self.board, 2, True).get_board()
         col = best_board.get_last_move()[1]
-        #col = random.randint(0,6)
-        #while not self.board.can_drop(col):
-        #    col = random.randint(0,6)
         self.board.drop(self.player_two, col)
         winner = self.board.find_winner()
         self.draw_board(screen)
@@ -280,8 +280,8 @@ class Game:
                             self.mouse_click_event(event, self.window)
                 else:
                     if not self.game_over:  # if AI goes first.
-                        self.ai_take_turn(event, self.window)
+                        self.ai_take_turn(self.window)
             pygame.display.flip()
 
-
+# Create a game, which starts it.
 g = Game()

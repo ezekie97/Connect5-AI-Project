@@ -1,7 +1,5 @@
 __author__ = "Bill"
 
-from src.board import *
-
 
 class HeuristicFinder:
     """
@@ -9,7 +7,11 @@ class HeuristicFinder:
     """
 
     def __init__(self, human_player, ai_player):
-
+        """
+        Create a HeurisiticFinder object.
+        :param human_player: the piece value for the human player
+        :param ai_player: the piece value for the ai player
+        """
         self.ai_player = ai_player
         self.human_player = human_player
 
@@ -19,8 +21,8 @@ class HeuristicFinder:
         :param board: A Connect 5 Board object.
         :return: a number representing the heuristic value.
             Special Values:
-                1000 - Board where AI wins.
-                -1000 - Board where AI loses.
+                10000 - Board where AI wins.
+                -10000 - Board where AI loses.
                 0  - Tie
         """
         if board.is_filled():
@@ -42,9 +44,12 @@ class HeuristicFinder:
             heuristic -= 100 * human_four_in_row + 10 * human_three_in_row + 0.5 * human_two_in_row
 
             bonus = 0
-            center = board.piece_at(6,4)
-            left_corner = board.piece_at(6,0)
-            right_corner = board.piece_at(6,8)
+
+            # Values for center and corners, vital pieces
+            center = board.piece_at(6, 4)
+            left_corner = board.piece_at(6, 0)
+            right_corner = board.piece_at(6, 8)
+
             if self.ai_player == center:  # center
                 bonus += 50
             elif self.human_player == center:
@@ -61,7 +66,4 @@ class HeuristicFinder:
                 bonus -= 15
 
             heuristic += bonus
-
-            #print("Heuristic")
-            #print(heuristic)
             return heuristic
