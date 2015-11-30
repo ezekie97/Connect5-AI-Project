@@ -15,7 +15,6 @@ class BoardNode:
         """
         self.board = board
         self.heuristic = heuristic
-        self.children = []
 
     def get_board(self):
         """
@@ -28,25 +27,6 @@ class BoardNode:
         :return: this node's heuristic
         """
         return self.heuristic
-
-    def has_children(self):
-        """
-        :return: True if this node has children.
-        """
-        return len(self.children) != 0
-
-    def get_children(self):
-        """
-        :return: this node's children
-        """
-        return self.children
-
-    def add_child(self, child):
-        """
-        Add a child to this node.
-        :param child: a board node.
-        """
-        self.children.append(child)
 
     def set_heuristic(self, h):
         """

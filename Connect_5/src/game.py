@@ -2,7 +2,6 @@ import pygame
 import random
 from src.minimax import *
 
-
 __author__ = 'Bill Ezekiel'
 
 
@@ -240,7 +239,8 @@ class Game:
         AI makes its move.
         :param screen: the game screen
         """
-        best_board = self.minimax.mini_max(self.board, 2, True).get_board()
+        node = BoardNode(self.board, MiniMax.NEG_INF)
+        best_board = self.minimax.mini_max(node, MiniMax.NEG_INF, MiniMax.INF, 2).get_board()
         col = best_board.get_last_move()[1]
         self.board.drop(self.player_two, col)
         winner = self.board.find_winner()
@@ -282,6 +282,7 @@ class Game:
                     if not self.game_over:  # if AI goes first.
                         self.ai_take_turn(self.window)
             pygame.display.flip()
+
 
 # Create a game, which starts it.
 g = Game()

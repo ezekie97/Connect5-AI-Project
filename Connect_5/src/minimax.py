@@ -12,6 +12,10 @@ class MiniMax:
     Assume AI is always max and human is always min.
     """
 
+    # Class constants
+    INF = float("inf")  # infinity
+    NEG_INF = - float("inf")  # -infinity
+
     def __init__(self, p1, p2):
         """
         Set up the minimax algorithm
@@ -22,45 +26,95 @@ class MiniMax:
         self.ai = p2
         self.heuristic_finder = HeuristicFinder(p1, self.ai)
 
-    def mini_max(self, board, depth, max_node):
+    def mini_max(self, node, alpha, beta, depth):
         """
-        Perform minimax
-        :param board: the current connect 5 board.
-        :param depth: the depth of the tree.
-        :param max_node: boolean value to determine whether we are at max or min node.
-        :return: The next node to move to in the min_max tree after the entire algorithm is complete.
+        MiniMax algorithm with alpha-beta pruning.
+        :param node: the current Max or Min Board Node
+        :param alpha: the alpha value
+        :param beta: the beta value
+        :param depth: the depth of the search.
+        :return: the node which represents the next best move to make.
         """
-        if depth == 0:
-            return BoardNode(board, self.heuristic_finder.heuristic(board))
-        elif max_node:  # max
-            parent = BoardNode(board, 0)
+        # Depth is assumed to be > 0.
+        node_board = node.get_board()
+        maximum = self.NEG_INF
+        best = None
+        for col in range(0, Board.get_length()):
+            if node_board.can_drop(col):
+                board_copy = copy.deepcopy(node_board)
+                board_copy.drop(self.ai, col)
+                min_node = BoardNode(board_copy, self.INF)
+                child = self.mini_max_min(min_node, alpha, beta, depth - 1)
+                ch = child.get_heuristic()
+                if ch > maximum:
+                    maximum = ch
+                    best = min_node
+                    alpha = max(alpha, ch)
+                    if beta <= alpha:
+                        break
+        return best
+
+    def mini_max_min(self, node, alpha, beta, depth):
+        """
+        MiniMax algorithm with alpha-beta pruning. Min Node Handling
+        :param node: the current Max or Min Board Node
+        :param alpha: the alpha value
+        :param beta: the beta value
+        :param depth: the depth of the search.
+        :return: the node which represents the next best move to make for the human.
+        """
+        if depth == 0 or node.get_board().find_winner() is not None:
+            node.set_heuristic(self.heuristic_finder.heuristic(node.get_board()))
+            return node
+        else:
+            # Depth is assumed to be > 0.
+            node_board = node.get_board()
+            minimum = self.INF
+            best = None
             for col in range(0, Board.get_length()):
-                board_copy = copy.deepcopy(board)
-                if board_copy.can_drop(col)[0]:
-                    board_copy.drop(self.ai, col)
-                    parent.add_child(
-                        BoardNode(board_copy, self.mini_max(board_copy, depth - 1, False).get_heuristic()))
-            children = parent.get_children()
-            maximum = children[0].get_heuristic()
-            child_pos = 0
-            for i in range(1, len(children)):
-                if children[i].get_heuristic() > maximum:
-                    maximum = children[i].get_heuristic()
-                    child_pos = i
-            return BoardNode(children[child_pos].get_board(), maximum)
-        else:  # min
-            parent = BoardNode(board, 0)
-            for col in range(0, Board.get_length()):
-                board_copy = copy.deepcopy(board)
-                if board_copy.can_drop(col)[0]:
+                if node_board.can_drop(col):
+                    board_copy = copy.deepcopy(node_board)
                     board_copy.drop(self.human, col)
-                    parent.add_child(
-                        BoardNode(board_copy, self.mini_max(board_copy, depth - 1, True).get_heuristic()))
-            children = parent.get_children()
-            minimum = children[0].get_heuristic()
-            child_pos = 0
-            for i in range(1, len(children)):
-                if children[i].get_heuristic() < minimum:
-                    minimum = children[i].get_heuristic()
-                    child_pos = i
-            return BoardNode(children[child_pos].get_board(), minimum)
+                    max_node = BoardNode(board_copy, self.NEG_INF)
+                    child = self.mini_max_max(max_node, alpha, beta, depth - 1)
+                    ch = child.get_heuristic()
+                    if ch < minimum:
+                        minimum = ch
+                        best = max_node
+                        best.set_heuristic(minimum)
+                        beta = min(beta, ch)
+                        if beta <= alpha:
+                            break
+            return best
+
+    def mini_max_max(self, node, alpha, beta, depth):
+        """
+        MiniMax algorithm with alpha-beta pruning. Max Node Hanlding
+        :param node: the current Max or Min Board Node
+        :param alpha: the alpha value
+        :param beta: the beta value
+        :param depth: the depth of the search.
+        :return: the node which represents the next best move to make for the ai.
+        """
+        if depth == 0 or node.get_board().find_winner() is not None:
+            node.set_heuristic(self.heuristic_finder.heuristic(node.get_board()))
+            return node
+        else:
+            node_board = node.get_board()
+            maximum = self.NEG_INF
+            best = None
+            for col in range(0, Board.get_length()):
+                if node_board.can_drop(col):
+                    board_copy = copy.deepcopy(node_board)
+                    board_copy.drop(self.ai, col)
+                    min_node = BoardNode(board_copy, self.INF)
+                    child = self.mini_max_min(min_node, alpha, beta, depth - 1)
+                    ch = child.get_heuristic()
+                    if ch > maximum:
+                        maximum = ch
+                        best = min_node
+                        best.set_heuristic(maximum)
+                        alpha = max(alpha, ch)
+                        if beta <= alpha:
+                            break
+            return best

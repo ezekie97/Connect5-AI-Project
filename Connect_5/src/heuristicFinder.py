@@ -40,8 +40,16 @@ class HeuristicFinder:
             human_three_in_row = board.find_n_in_a_row(self.human_player, 3)
             human_two_in_row = board.find_n_in_a_row(self.human_player, 2)
 
-            heuristic = 100 * ai_four_in_row + 10 * ai_three_in_row + 0.5 * ai_two_in_row
-            heuristic -= 100 * human_four_in_row + 10 * human_three_in_row + 0.5 * human_two_in_row
+            # Number of potential wins that can happen if one of the players fills in a blank spot
+            # between 4 or more of its own pieces.
+            ai_unconnected_wins = board.find_unconnected_wins(self.ai_player)
+            human_unconnected_wins = board.find_unconnected_wins(self.human_player)
+
+            ai_threats = ai_four_in_row + ai_unconnected_wins
+            human_threats = human_four_in_row + human_unconnected_wins
+
+            heuristic = 50 * ai_threats + 10 * ai_three_in_row + 0.5 * ai_two_in_row
+            heuristic -= 50 * human_threats + 10 * human_three_in_row + 0.5 * human_two_in_row
 
             bonus = 0
 

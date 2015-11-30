@@ -192,6 +192,108 @@ class Board:
         else:
             return None
 
+    def find_unconnected_wins(self, piece):
+        """
+        Find blank areas that, when filled in with the given type of piece, cause a victory
+        for that piece.
+        :param piece: the player piece
+        :return: the number of unconnected wins.
+        """
+        count = 0
+        for row in range(0, Board.get_height()):
+            for col in range(0, Board.get_length()):
+                current_piece = self.grid[col][row]
+                if current_piece == Board.BLANK_SPACE:
+                    count += self.find_horizontal_unconnected_wins(piece, col, row)
+                    count += self.has_diagonal_disjointed_four(piece, col, row)
+        return count
+
+    def find_horizontal_unconnected_wins(self, piece, col_num, row_num):
+        """
+        :param piece: the character to check for.
+        :param col_num: the column number of the last move made.
+        :param row_num: the row number of the last move made.
+        :return: 1 if the filled in blank piece causes a horizontal victory for its corresponding player.
+        """
+        connection = 1
+        curr_col = col_num - 1
+        while curr_col >= 0:
+            if self.grid[curr_col][row_num] == piece:
+                connection += 1
+                curr_col -= 1
+            else:  # can't possibly have a longer connection this way.
+                break
+
+        curr_col = col_num + 1
+        while curr_col < self.BOARD_LENGTH:
+            if self.grid[curr_col][row_num] == piece:
+                connection += 1
+                curr_col += 1
+            else:  # can't possibly have a longer connection this way.
+                break
+        if connection >= 4:
+            return 1
+        return 0
+
+    def has_diagonal_disjointed_four(self, piece, col_num, row_num):
+        """
+        :param piece: the character to check for.
+        :param col_num: the column number of the last move made.
+        :param row_num: the row number of the last move made.
+        :return: 1 if the filled in blank piece causes a diagonal victory for its corresponding player.
+        """
+        result = 0
+        connection = 1
+        # Upper Left to Lower Right Diagonal
+        curr_row = row_num - 1
+        curr_col = col_num - 1
+        while curr_row >= 0 and curr_col >= 0:
+            if self.grid[curr_col][curr_row] == piece:
+                connection += 1
+                curr_col -= 1
+                curr_row -= 1
+            else:  # can't possibly have a longer connection this way.
+                break
+
+        curr_row = row_num + 1
+        curr_col = col_num + 1
+
+        while curr_row < self.BOARD_HEIGHT and curr_col < self.BOARD_LENGTH:
+            if self.grid[curr_col][curr_row] == piece:
+                connection += 1
+                curr_col += 1
+                curr_row += 1
+            else:  # can't possibly have a longer connection this way.
+                break
+
+        if connection >= 4:
+            result += 1
+
+        # Lower Left to Upper Right Diagonal
+        connection = 1
+        curr_row = row_num - 1
+        curr_col = col_num + 1
+        while curr_row >= 0 and curr_col < self.BOARD_LENGTH:
+            if self.grid[curr_col][curr_row] == piece:
+                connection += 1
+                curr_row -= 1
+                curr_col += 1
+            else:  # can't possibly have a longer connection this way.
+                break
+
+        curr_row = row_num + 1
+        curr_col = col_num - 1
+        while curr_row < self.BOARD_HEIGHT and curr_col >= 0:
+            if self.grid[curr_col][curr_row] == piece:
+                connection += 1
+                curr_row += 1
+                curr_col -= 1
+            else:  # can't possibly have a longer connection this way.
+                break
+        if connection >= 4:
+            result += 1
+        return result
+
     def create_grid(self):
         """
         :return: a 2-dimensional array representing the game grid.
