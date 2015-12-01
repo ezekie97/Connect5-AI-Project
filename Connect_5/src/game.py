@@ -240,7 +240,7 @@ class Game:
         :param screen: the game screen
         """
         node = BoardNode(self.board, MiniMax.NEG_INF)
-        best_board = self.minimax.mini_max(node, MiniMax.NEG_INF, MiniMax.INF, 2).get_board()
+        best_board = self.minimax.mini_max(node, MiniMax.NEG_INF, MiniMax.INF, 3).get_board()
         col = best_board.get_last_move()[1]
         self.board.drop(self.player_two, col)
         winner = self.board.find_winner()

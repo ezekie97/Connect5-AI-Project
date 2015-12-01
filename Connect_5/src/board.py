@@ -192,7 +192,7 @@ class Board:
         else:
             return None
 
-    def find_unconnected_wins(self, piece):
+    def find_disconnected_wins(self, piece):
         """
         Find blank areas that, when filled in with the given type of piece, cause a victory
         for that piece.
@@ -204,11 +204,11 @@ class Board:
             for col in range(0, Board.get_length()):
                 current_piece = self.grid[col][row]
                 if current_piece == Board.BLANK_SPACE:
-                    count += self.find_horizontal_unconnected_wins(piece, col, row)
-                    count += self.has_diagonal_disjointed_four(piece, col, row)
+                    count += self.find_horizontal_disconnected_wins(piece, col, row)
+                    count += self.find_disconnected_diagonal_wins(piece, col, row)
         return count
 
-    def find_horizontal_unconnected_wins(self, piece, col_num, row_num):
+    def find_horizontal_disconnected_wins(self, piece, col_num, row_num):
         """
         :param piece: the character to check for.
         :param col_num: the column number of the last move made.
@@ -235,7 +235,7 @@ class Board:
             return 1
         return 0
 
-    def has_diagonal_disjointed_four(self, piece, col_num, row_num):
+    def find_disconnected_diagonal_wins(self, piece, col_num, row_num):
         """
         :param piece: the character to check for.
         :param col_num: the column number of the last move made.

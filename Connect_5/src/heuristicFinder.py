@@ -42,8 +42,8 @@ class HeuristicFinder:
 
             # Number of potential wins that can happen if one of the players fills in a blank spot
             # between 4 or more of its own pieces.
-            ai_unconnected_wins = board.find_unconnected_wins(self.ai_player)
-            human_unconnected_wins = board.find_unconnected_wins(self.human_player)
+            ai_unconnected_wins = board.find_disconnected_wins(self.ai_player)
+            human_unconnected_wins = board.find_disconnected_wins(self.human_player)
 
             ai_threats = ai_four_in_row + ai_unconnected_wins
             human_threats = human_four_in_row + human_unconnected_wins
